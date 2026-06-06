@@ -6,7 +6,7 @@ Copyright (C) 2024 Sai Vignesh Golla
 
 License:    GNU Affero General Public License
             https://www.gnu.org/licenses/agpl-3.0.en.html
-            
+
 GitHub:     https://github.com/GodsScion/Auto_job_applier_linkedIn
 
 Support me: https://github.com/sponsors/GodsScion
@@ -46,7 +46,7 @@ YOU DON'T HAVE TO EDIT THIS FILE, IF YOU ADDED YOUR DEFAULT RESUME.
 
 # ## Allow Manual Inputs
 # # Should the tool pause before every submit application during easy apply to let you check the information?
-# pause_before_submit = True         # True or False, Note: True or False are case-sensitive
+pause_before_submit = True         # True or False, Note: True or False are case-sensitive
 # '''
 # Note: Will be treated as False if `run_in_background = True`
 # '''

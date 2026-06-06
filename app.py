@@ -7,7 +7,9 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-PATH = 'all excels/'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PATH = os.path.join(BASE_DIR, 'all excels')
+APPLIED_JOBS_CSV = os.path.join(PATH, 'all_applied_applications_history.csv')
 ##> ------ Karthik Sarode : karthik.sarode23@gmail.com - UI for excel files ------
 @app.route('/')
 def home():
@@ -18,17 +20,20 @@ def home():
 def get_applied_jobs():
     '''
     Retrieves a list of applied jobs from the applications history CSV file.
-    
-    Returns a JSON response containing a list of jobs, each with details such as 
+
+    Returns a JSON response containing a list of jobs, each with details such as
     Job ID, Title, Company, HR Name, HR Link, Job Link, External Job link, and Date Applied.
-    
+
     If the CSV file is not found, returns a 404 error with a relevant message.
     If any other exception occurs, returns a 500 error with the exception message.
     '''
 
     try:
         jobs = []
-        with open(PATH + 'all_applied_applications_history.csv', 'r', encoding='utf-8') as file:
+        if not os.path.exists(APPLIED_JOBS_CSV):
+            return jsonify([])
+
+        with open(APPLIED_JOBS_CSV, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 jobs.append({
@@ -42,8 +47,6 @@ def get_applied_jobs():
                     'Date_Applied': row['Date Applied']
                 })
         return jsonify(jobs)
-    except FileNotFoundError:
-        return jsonify({"error": "No applications history found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -63,11 +66,11 @@ def update_applied_date(job_id):
     """
     try:
         data = []
-        csvPath = PATH + 'all_applied_applications_history.csv'
-        
+        csvPath = APPLIED_JOBS_CSV
+
         if not os.path.exists(csvPath):
             return jsonify({"error": f"CSV file not found at {csvPath}"}), 404
-            
+
         # Read current CSV content
         with open(csvPath, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
@@ -78,7 +81,7 @@ def update_applied_date(job_id):
                     row['Date Applied'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     found = True
                 data.append(row)
-        
+
         if not found:
             return jsonify({"error": f"Job ID {job_id} not found"}), 404
 
@@ -86,7 +89,7 @@ def update_applied_date(job_id):
             writer = csv.DictWriter(file, fieldnames=fieldNames)
             writer.writeheader()
             writer.writerows(data)
-        
+
         return jsonify({"message": "Date Applied updated successfully"}), 200
     except Exception as e:
         print(f"Error updating applied date: {str(e)}")  # Debug log

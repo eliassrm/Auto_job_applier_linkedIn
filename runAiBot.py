@@ -233,42 +233,53 @@ def apply_filters() -> None:
 
     try:
         recommended_wait = 1 if click_gap < 1 else 0
+        filter_problems = []
 
         wait.until(EC.presence_of_element_located((By.XPATH, '//button[normalize-space()="All filters"]'))).click()
         buffer(recommended_wait)
 
-        wait_span_click(driver, sort_by)
-        wait_span_click(driver, date_posted)
+        if sort_by and not wait_span_click(driver, sort_by):
+            filter_problems.append(sort_by)
+        if date_posted and not wait_span_click(driver, date_posted):
+            filter_problems.append(date_posted)
         buffer(recommended_wait)
 
-        multi_sel_noWait(driver, experience_level) 
-        multi_sel_noWait(driver, companies, actions)
+        filter_problems.extend(multi_sel_noWait(driver, experience_level))
+        filter_problems.extend(multi_sel_noWait(driver, companies, actions))
         if experience_level or companies: buffer(recommended_wait)
 
-        multi_sel_noWait(driver, job_type)
-        multi_sel_noWait(driver, on_site)
+        filter_problems.extend(multi_sel_noWait(driver, job_type))
+        filter_problems.extend(multi_sel_noWait(driver, on_site))
         if job_type or on_site: buffer(recommended_wait)
 
-        if easy_apply_only: boolean_button_click(driver, actions, "Easy Apply")
+        if easy_apply_only and not boolean_button_click(driver, actions, "Easy Apply"):
+            filter_problems.append("Easy Apply")
         
-        multi_sel_noWait(driver, location)
-        multi_sel_noWait(driver, industry)
+        filter_problems.extend(multi_sel_noWait(driver, location))
+        filter_problems.extend(multi_sel_noWait(driver, industry))
         if location or industry: buffer(recommended_wait)
 
-        multi_sel_noWait(driver, job_function)
-        multi_sel_noWait(driver, job_titles)
+        filter_problems.extend(multi_sel_noWait(driver, job_function))
+        filter_problems.extend(multi_sel_noWait(driver, job_titles))
         if job_function or job_titles: buffer(recommended_wait)
 
-        if under_10_applicants: boolean_button_click(driver, actions, "Under 10 applicants")
-        if in_your_network: boolean_button_click(driver, actions, "In your network")
-        if fair_chance_employer: boolean_button_click(driver, actions, "Fair Chance Employer")
+        if under_10_applicants and not boolean_button_click(driver, actions, "Under 10 applicants"):
+            filter_problems.append("Under 10 applicants")
+        if in_your_network and not boolean_button_click(driver, actions, "In your network"):
+            filter_problems.append("In your network")
+        if fair_chance_employer and not boolean_button_click(driver, actions, "Fair Chance Employer"):
+            filter_problems.append("Fair Chance Employer")
 
-        wait_span_click(driver, salary)
+        if salary and not wait_span_click(driver, salary):
+            filter_problems.append(salary)
         buffer(recommended_wait)
         
-        multi_sel_noWait(driver, benefits)
-        multi_sel_noWait(driver, commitments)
+        filter_problems.extend(multi_sel_noWait(driver, benefits))
+        filter_problems.extend(multi_sel_noWait(driver, commitments))
         if benefits or commitments: buffer(recommended_wait)
+
+        if filter_problems:
+            raise ValueError(f"Could not auto-select configured filters: {', '.join(filter_problems)}")
 
         show_results_button: WebElement = driver.find_element(By.XPATH, '//button[contains(translate(@aria-label, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "apply current filters to show")]')
         show_results_button.click()
@@ -279,11 +290,24 @@ def apply_filters() -> None:
 
     except Exception as e:
         print_lg("Setting the preferences failed!")
-        pyautogui.confirm(
-            f"Faced error while applying filters. Please make sure correct filters are selected, click on show results and click on any button of this dialog, I know it sucks. Can't turn off Pause after search when error occurs! ERROR: {e}",
-            "Filter Error",
-            ["Doesn't look good, but Continue XD", "Look's good, Continue"]
+        print_lg(e)
+        pyautogui.alert(
+            "The bot could not apply one or more LinkedIn filters automatically.\n\n"
+            "Please use the open Chrome window now:\n"
+            f"1. Set the job location/search location manually if needed: {search_location or '(no configured search location)'}\n"
+            "2. Open All filters and select the filters you want.\n"
+            "3. Click LinkedIn's Show results button if it is visible.\n"
+            "4. Return to this popup and click Continue.\n\n"
+            "The bot will continue from the results currently shown in LinkedIn.",
+            "Manual Filter Setup Required",
+            "Continue"
         )
+        try:
+            show_results_button: WebElement = driver.find_element(By.XPATH, '//button[contains(translate(@aria-label, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "apply current filters to show")]')
+            show_results_button.click()
+            print_lg("Clicked Show results after manual filter setup.")
+        except Exception:
+            print_lg("Continuing after manual filter setup with current visible results.")
         # print_lg(e)
 
 

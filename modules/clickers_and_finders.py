@@ -65,12 +65,14 @@ def multi_sel(driver: WebDriver, texts: list, time: float=5.0) -> None:
             print_lg("Click Failed! Didn't find '"+text+"'")
             # print_lg(e)
 
-def multi_sel_noWait(driver: WebDriver, texts: list, actions: ActionChains = None) -> None:
+def multi_sel_noWait(driver: WebDriver, texts: list, actions: ActionChains = None) -> list[str]:
     '''
     - For each text in the `texts`, tries to find and click `span` element with that class.
     - If `actions` is provided, bot tries to search and Add the `text` to this filters list section.
     - Won't wait to search for each element, assumes that element is rendered.
+    - Returns the texts that could not be selected.
     '''
+    failed_texts = []
     for text in texts:
         try:
             button = driver.find_element(By.XPATH, './/span[normalize-space(.)="'+text+'"]')
@@ -78,11 +80,19 @@ def multi_sel_noWait(driver: WebDriver, texts: list, actions: ActionChains = Non
             button.click()
             buffer(click_gap)
         except Exception as e:
-            if actions: company_search_click(driver,actions,text)
-            else:   print_lg("Click Failed! Didn't find '"+text+"'")
+            if actions:
+                try:
+                    company_search_click(driver,actions,text)
+                except Exception:
+                    print_lg("Click Failed! Didn't find '"+text+"'")
+                    failed_texts.append(text)
+            else:
+                print_lg("Click Failed! Didn't find '"+text+"'")
+                failed_texts.append(text)
             # print_lg(e)
+    return failed_texts
 
-def boolean_button_click(driver: WebDriver, actions: ActionChains, text: str) -> None:
+def boolean_button_click(driver: WebDriver, actions: ActionChains, text: str) -> bool:
     '''
     Tries to click on the boolean button with the given `text` text.
     '''
@@ -92,9 +102,11 @@ def boolean_button_click(driver: WebDriver, actions: ActionChains, text: str) ->
         scroll_to_view(driver, button)
         actions.move_to_element(button).click().perform()
         buffer(click_gap)
+        return True
     except Exception as e:
         print_lg("Click Failed! Didn't find '"+text+"'")
         # print_lg(e)
+        return False
 
 # Find functions
 def find_by_class(driver: WebDriver, class_name: str, time: float=5.0) -> WebElement | Exception:

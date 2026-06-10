@@ -6,7 +6,7 @@ Copyright (C) 2024 Sai Vignesh Golla
 
 License:    GNU Affero General Public License
             https://www.gnu.org/licenses/agpl-3.0.en.html
-            
+
 GitHub:     https://github.com/GodsScion/Auto_job_applier_linkedIn
 
 Support me: https://github.com/sponsors/GodsScion
@@ -19,7 +19,7 @@ version:    24.12.3.10.30
 
 
 # Login Credentials for LinkedIn (Optional)
-username = "username@example.com"       # Enter your username in the quotes
+username = "esaffarmoghadam@gmail.com"       # Enter your username in the quotes
 password = "example_password"           # Enter your password in the quotes
 
 
@@ -34,7 +34,7 @@ Note: Set it as True only if you want to use AI, and If you either have a
     c. LM Studio - https://lmstudio.ai/ (Recommended)
     d. Jan - https://jan.ai/
 2. OR you have a valid OpenAI API Key, and money to spare, and you don't mind spending it.
-CHECK THE OPENAI API PIRCES AT THEIR WEBSITE (https://openai.com/api/pricing/). 
+CHECK THE OPENAI API PIRCES AT THEIR WEBSITE (https://openai.com/api/pricing/).
 '''
 
 ##> ------ Yang Li : MARKYangL - Feature ------
@@ -57,7 +57,7 @@ llm_api_url = "https://api.openai.com/v1/"       # Examples: "https://api.openai
 Note: Don't forget to add / at the end of your url. You may not need this if you are using Gemini.
 '''
 
-# Your LLM API key or other AI API key 
+# Your LLM API key or other AI API key
 llm_api_key = "not-needed"              # Enter your API key in the quotes, make sure it's valid, if not will result in error.
 '''
 Note: Leave it empty as "" or "not-needed" if not needed. Else will result in error!

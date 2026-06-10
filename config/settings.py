@@ -15,6 +15,16 @@ version:    26.01.20.5.08
 '''
 
 
+import os
+
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def project_path(*parts: str) -> str:
+    return os.path.normpath(os.path.join(PROJECT_ROOT, *parts))
+
+
 ###################################################### CONFIGURE YOUR BOT HERE ######################################################
 
 # >>>>>>>>>>> LinkedIn Settings <<<<<<<<<<<
@@ -51,7 +61,7 @@ stop_date_cycle_at_24hr = True      # True or False, Note: True or False are cas
 # >>>>>>>>>>> RESUME GENERATOR (Experimental & In Development) <<<<<<<<<<<
 
 # Give the path to the folder where all the generated resumes are to be stored
-generated_resume_path = "all resumes/" # (In Development)
+generated_resume_path = project_path("all resumes") # (In Development)
 
 
 
@@ -60,9 +70,9 @@ generated_resume_path = "all resumes/" # (In Development)
 # >>>>>>>>>>> Global Settings <<<<<<<<<<<
 
 # Directory and name of the files where history of applied jobs is saved (Sentence after the last "/" will be considered as the file name).
-file_name = "all excels/all_applied_applications_history.csv"
-failed_file_name = "all excels/all_failed_applications_history.csv"
-logs_folder_path = "logs/"
+file_name = project_path("all excels", "all_applied_applications_history.csv")
+failed_file_name = project_path("all excels", "all_failed_applications_history.csv")
+logs_folder_path = project_path("logs")
 
 # Set the maximum amount of time allowed to wait between each click in secs
 click_gap = 1                       # Enter max allowed secs to wait approximately. (Only Non Negative Integers Eg: 0,1,2,3,....)

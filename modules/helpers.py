@@ -28,7 +28,7 @@ from datetime import datetime, timedelta
 from pyautogui import alert
 from pprint import pprint
 
-from config.settings import logs_folder_path
+from config.settings import logs_folder_path, project_path
 
 
 
@@ -41,6 +41,8 @@ def make_directories(paths: list[str]) -> None:
     '''
     for path in paths:
         path = os.path.expanduser(path) # Expands ~ to user's home directory
+        if path and not os.path.isabs(path):
+            path = project_path(path)
         path = path.replace("//","/")
         
         # If path looks like a file path, get the directory part

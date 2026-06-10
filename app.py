@@ -86,7 +86,7 @@ def update_applied_date(job_id):
             return jsonify({"error": f"Job ID {job_id} not found"}), 404
 
         with open(csvPath, 'w', encoding='utf-8', newline='') as file:
-            writer = csv.DictWriter(file, fieldnames=fieldNames)
+            writer = csv.DictWriter(file, fieldnames=fieldNames) # correct
             writer.writeheader()
             writer.writerows(data)
 

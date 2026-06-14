@@ -82,6 +82,10 @@ dailyEasyApplyLimitReached = False
 
 re_experience = re.compile(r'[(]?\s*(\d+)\s*[)]?\s*[-to]*\s*\d*[+]*\s*year[s]?', re.IGNORECASE)
 
+RunStatus = Literal["end_of_results", "daily_limit"]
+RUN_STATUS_END_OF_RESULTS: RunStatus = "end_of_results"
+RUN_STATUS_DAILY_LIMIT: RunStatus = "daily_limit"
+
 desired_salary_lakhs = str(round(desired_salary / 100000, 2))
 desired_salary_monthly = str(round(desired_salary/12, 2))
 desired_salary = str(desired_salary)
@@ -136,6 +140,24 @@ def wait_for_manual_linkedin_login() -> bool:
 
     print_lg("Manual login confirmation clicked, but LinkedIn still does not look logged in.")
     return False
+
+
+def wait_for_manual_linkedin_input() -> None:
+    '''
+    Pauses after the bot reaches the end of the current LinkedIn results so the
+    user can manually change the visible LinkedIn search/results page.
+    '''
+    print_lg("Reached the end of the current LinkedIn results. Waiting for manual LinkedIn input...")
+    pyautogui.alert(
+        "The bot reached the end of the current LinkedIn results.\n\n"
+        "Use the open Chrome window to manually update LinkedIn now:\n"
+        "1. Change the search, filters, location, or page as needed.\n"
+        "2. Make sure the jobs you want are visible in LinkedIn.\n"
+        "3. Return here and press Enter or click OK.\n\n"
+        "The bot will resume from the currently visible LinkedIn results.",
+        "Manual LinkedIn Input Required",
+        "OK"
+    )
 
 
 def login_LN() -> None:
@@ -914,20 +936,25 @@ def discard_job() -> None:
 
 
 # Function to apply to jobs
-def apply_to_jobs(search_terms: list[str]) -> None:
+def apply_to_jobs(search_terms: list[str], use_current_page: bool = False) -> RunStatus:
     applied_jobs = get_applied_job_ids()
     rejected_jobs = set()
     blacklisted_companies = set()
     global current_city, failed_count, skip_count, easy_applied_count, external_jobs_count, tabs_count, pause_before_submit, pause_at_failed_question, useNewResume
     current_city = current_city.strip()
 
-    if randomize_search_order:  shuffle(search_terms)
-    for searchTerm in search_terms:
-        driver.get(f"https://www.linkedin.com/jobs/search/?keywords={searchTerm}")
-        print_lg("\n________________________________________________________________________________________________________________________\n")
-        print_lg(f'\n>>>> Now searching for "{searchTerm}" <<<<\n\n')
+    terms_to_process: list[str | None] = [None] if use_current_page else search_terms
+    if randomize_search_order and not use_current_page:  shuffle(terms_to_process)
+    for searchTerm in terms_to_process:
+        if use_current_page:
+            print_lg("\n________________________________________________________________________________________________________________________\n")
+            print_lg("\n>>>> Resuming from the currently visible LinkedIn results <<<<\n\n")
+        else:
+            driver.get(f"https://www.linkedin.com/jobs/search/?keywords={searchTerm}")
+            print_lg("\n________________________________________________________________________________________________________________________\n")
+            print_lg(f'\n>>>> Now searching for "{searchTerm}" <<<<\n\n')
 
-        apply_filters()
+            apply_filters()
 
         current_count = 0
         try:
@@ -1161,7 +1188,7 @@ def apply_to_jobs(search_terms: list[str]) -> None:
                         skip, application_link, tabs_count = external_apply(pagination_element, job_id, job_link, resume, date_listed, application_link, screenshot_name)
                         if dailyEasyApplyLimitReached:
                             print_lg("\n###############  Daily application limit for Easy Apply is reached!  ###############\n")
-                            return
+                            return RUN_STATUS_DAILY_LIMIT
                         if skip: continue
 
                     submitted_jobs(job_id, title, company, work_location, work_style, description, experience_required, skills, hr_name, hr_link, resume, reposted, date_listed, date_applied, job_link, application_link, questions_list, connect_request)
@@ -1197,24 +1224,23 @@ def apply_to_jobs(search_terms: list[str]) -> None:
             except Exception as page_source_error:
                 print_lg(f"Failed to get page source, browser might have crashed. {page_source_error}")
             # print_lg(e)
+    return RUN_STATUS_DAILY_LIMIT if dailyEasyApplyLimitReached else RUN_STATUS_END_OF_RESULTS
 
         
-def run(total_runs: int) -> int:
+def run(total_runs: int, use_current_page: bool = False) -> tuple[int, RunStatus]:
     if dailyEasyApplyLimitReached:
-        return total_runs
+        return total_runs, RUN_STATUS_DAILY_LIMIT
     print_lg("\n########################################################################################################################\n")
     print_lg(f"Date and Time: {datetime.now()}")
     print_lg(f"Cycle number: {total_runs}")
-    print_lg(f"Currently looking for jobs posted within '{date_posted}' and sorting them by '{sort_by}'")
-    apply_to_jobs(search_terms)
+    if use_current_page:
+        print_lg("Resuming from the currently visible LinkedIn results.")
+    else:
+        print_lg(f"Currently looking for jobs posted within '{date_posted}' and sorting them by '{sort_by}'")
+    run_status = apply_to_jobs(search_terms, use_current_page=use_current_page)
     print_lg("########################################################################################################################\n")
-    if not dailyEasyApplyLimitReached:
-        print_lg("Sleeping for 10 min...")
-        sleep(300)
-        print_lg("Few more min... Gonna start with in next 5 min...")
-        sleep(300)
     buffer(3)
-    return total_runs + 1
+    return total_runs + 1, run_status
 
 
 
@@ -1271,20 +1297,13 @@ def main() -> None:
         
         # Start applying to jobs
         driver.switch_to.window(linkedIn_tab)
-        total_runs = run(total_runs)
-        while(run_non_stop):
-            if cycle_date_posted:
-                date_options = ["Any time", "Past month", "Past week", "Past 24 hours"]
-                global date_posted
-                date_posted = date_options[date_options.index(date_posted)+1 if date_options.index(date_posted)+1 > len(date_options) else -1] if stop_date_cycle_at_24hr else date_options[0 if date_options.index(date_posted)+1 >= len(date_options) else date_options.index(date_posted)+1]
-            if alternate_sortby:
-                global sort_by
-                sort_by = "Most recent" if sort_by == "Most relevant" else "Most relevant"
-                total_runs = run(total_runs)
-                sort_by = "Most recent" if sort_by == "Most relevant" else "Most relevant"
-            total_runs = run(total_runs)
-            if dailyEasyApplyLimitReached:
-                break
+        total_runs, run_status = run(total_runs)
+        while run_status != RUN_STATUS_DAILY_LIMIT:
+            wait_for_manual_linkedin_input()
+            driver.switch_to.window(linkedIn_tab)
+            if not is_logged_in_LN():
+                manual_login_retry(is_logged_in_LN, 2)
+            total_runs, run_status = run(total_runs, use_current_page=True)
         
 
     except (NoSuchWindowException, WebDriverException) as e:

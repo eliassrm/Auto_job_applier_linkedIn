@@ -19,10 +19,10 @@ version:    26.01.20.5.08
 
 # These Sentences are Searched in LinkedIn
 # Enter your search terms inside '[ ]' with quotes ' "searching title" ' for each search followed by comma ', ' Eg: ["Software Engineer", "Software Developer", "Selenium Developer"]
-search_terms = ["Signal Processing Engineer", "Telecommunications Engineer", "RF Engineer", "5G Engineer", "6G Engineer", "Wireless Communication Engineer", "Embedded Software Engineer", "Firmware Engineer", "IoT Engineer", "Python Developer", "C++ Developer", "Java Developer", "Full Stack Developer","AI Engineer","Software Engineer", "Network Engineer",]
+search_terms = [ "RF Engineer", "5G Engineer", "6G Engineer", "Wireless Communication Engineer", "Embedded Software Engineer", "Firmware Engineer", "IoT Engineer", "Python Developer", "C++ Developer", "Java Developer", "Full Stack Developer","AI Engineer","Software Engineer", "Network Engineer","Signal Processing Engineer", "Telecommunications Engineer",]
 
 # Search location, this will be filled in "City, state, or zip code" search box. If left empty as "", tool will not fill it.
-search_location = "Italy"               # Some valid examples: "", "United States", "India", "Chicago, Illinois, United States", "90001, Los Angeles, California, United States", "Bengaluru, Karnataka, India", etc.
+search_location = "Genoa, Liguria, Italy"               # Some valid examples: "", "United States", "India", "Chicago, Illinois, United States", "90001, Los Angeles, California, United States", "Bengaluru, Karnataka, India", etc.
 
 # After how many number of applications in current search should the bot switch to next search?
 switch_number = 5                 # Only numbers greater than 0... Don't put in quotes
@@ -60,7 +60,7 @@ on_site = []                       # (multiple select) "On-site", "Remote", "Hyb
 
 companies = []                     # (dynamic multiple select) make sure the name you type in list exactly matches with the company name you're looking for, including capitals.
                                    # Eg: "7-eleven", "Google","X, the moonshot factory","YouTube","CapitalG","Adometry (acquired by Google)","Meta","Apple","Byte Dance","Netflix", "Snowflake","Mineral.ai","Microsoft","JP Morgan","Barclays","Visa","American Express", "Snap Inc", "JPMorgan Chase & Co.", "Tata Consultancy Services", "Recruiting from Scratch", "Epic", and so on...
-location = ["Genova"]                      # (dynamic multiple select)
+location = []                      # (dynamic multiple select)
 industry = []                      # (dynamic multiple select)
 job_function = []                  # (dynamic multiple select)
 job_titles = []                    # (dynamic multiple select)

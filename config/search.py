@@ -19,13 +19,13 @@ version:    26.01.20.5.08
 
 # These Sentences are Searched in LinkedIn
 # Enter your search terms inside '[ ]' with quotes ' "searching title" ' for each search followed by comma ', ' Eg: ["Software Engineer", "Software Developer", "Selenium Developer"]
-search_terms = [ "RF Engineer", "5G Engineer", "6G Engineer", "Wireless Communication Engineer", "Embedded Software Engineer", "Firmware Engineer", "IoT Engineer", "Python Developer", "C++ Developer", "Java Developer", "Full Stack Developer","AI Engineer","Software Engineer", "Network Engineer","Signal Processing Engineer", "Telecommunications Engineer",]
+search_terms = ["Wireless Communication Engineer", "RF Engineer", "5G Engineer", "6G Engineer", "PHY Layer Engineer", "Embedded Software Engineer", "Firmware Engineer", "IoT Engineer", "Python Developer", "C++ Developer", "Full Stack Developer", "Backend Engineer", "Node.js Developer", "AI Engineer", "ML Engineer", "Software Engineer", "Network Engineer", "Signal Processing Engineer", "Telecommunications Engineer", "Simulation Engineer", "Digital Twin Engineer", "WebRTC Engineer", "DevOps Engineer"]
 
 # Search location, this will be filled in "City, state, or zip code" search box. If left empty as "", tool will not fill it.
-search_location = "Genoa, Liguria, Italy"               # Some valid examples: "", "United States", "India", "Chicago, Illinois, United States", "90001, Los Angeles, California, United States", "Bengaluru, Karnataka, India", etc.
+search_location = "Italy"               # Some valid examples: "", "United States", "India", "Chicago, Illinois, United States", "90001, Los Angeles, California, United States", "Bengaluru, Karnataka, India", etc.
 
 # After how many number of applications in current search should the bot switch to next search?
-switch_number = 5                 # Only numbers greater than 0... Don't put in quotes
+switch_number = 20                 # Only numbers greater than 0... Don't put in quotes
 
 # Do you want to randomize the search order for search_terms?
 randomize_search_order = False     # True of False, Note: True or False are case-sensitive
@@ -49,7 +49,7 @@ This is below format: QUESTION = VALID_ANSWER
 '''
 
 sort_by = "Most recent"                       # "Most recent", "Most relevant" or ("" to not select)
-date_posted = "Past 24 hours"         # "Any time", "Past month", "Past week", "Past 24 hours" or ("" to not select)
+date_posted = "Past week"         # "Any time", "Past month", "Past week", "Past 24 hours" or ("" to not select)
 salary = ""                        # "$40,000+", "$60,000+", "$80,000+", "$100,000+", "$120,000+", "$140,000+", "$160,000+", "$180,000+", "$200,000+"
 
 easy_apply_only = True             # True or False, Note: True or False are case-sensitive
@@ -85,13 +85,13 @@ pause_after_filters = True         # True or False, Note: True or False are case
 ## >>>>>>>>>>> SKIP IRRELEVANT JOBS <<<<<<<<<<<
 
 # Avoid applying to these companies, and companies with these bad words in their 'About Company' section...
-about_company_bad_words = ["Crossover"]       # (dynamic multiple search) or leave empty as []. Ex: ["Staffing", "Recruiting", "Name of Company you don't want to apply to"]
+about_company_bad_words = ["Crossover", "Staffing", "Recruiting", "Recruitment Agency"]       # (dynamic multiple search) or leave empty as []. Ex: ["Staffing", "Recruiting", "Name of Company you don't want to apply to"]
 
 # Skip checking for `about_company_bad_words` for these companies if they have these good words in their 'About Company' section... [Exceptions, For example, I want to apply to "Robert Half" although it's a staffing company]
 about_company_good_words = []      # (dynamic multiple search) or leave empty as []. Ex: ["Robert Half", "Dice"]
 
 # Avoid applying to these companies if they have these bad words in their 'Job Description' section...  (In development)
-bad_words = ["US Citizen","USA Citizen","No C2C", "No Corp2Corp", ".NET", "Embedded Programming", "PHP", "Ruby", "CNC"]                     # (dynamic multiple search) or leave empty as []. Case Insensitive. Ex: ["word_1", "phrase 1", "word word", "polygraph", "US Citizenship", "Security Clearance"]
+bad_words = ["US Citizen", "USA Citizen", "No C2C", "No Corp2Corp", ".NET", "PHP", "Ruby", "CNC", "Security Clearance", "NOS BIS", "Italiano madrelingua", "madrelingua italiana", "Italian native", "Native Italian", "Italian C1", "Italian C2", "Italian (C1)", "Italian (C2)", "lingua italiana C", "Italian level C"]                     # (dynamic multiple search) or leave empty as []. Case Insensitive. Ex: ["word_1", "phrase 1", "word word", "polygraph", "US Citizenship", "Security Clearance"]
 
 # Do you have an active Security Clearance? (True for Yes and False for No)
 security_clearance = False         # True or False, Note: True or False are case-sensitive

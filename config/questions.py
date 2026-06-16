@@ -48,7 +48,7 @@ linkedIn = "http://www.linkedin.com/in/elias-saffarmoghadam"       # "https://ww
 
 # What is the status of your citizenship? # If left empty as "", tool will not answer the question. However, note that some companies make it compulsory to be answered
 # Valid options are: "U.S. Citizen/Permanent Resident", "Non-citizen allowed to work for any employer", "Non-citizen allowed to work for current employer", "Non-citizen seeking work authorization", "Canadian Citizen/Permanent Resident" or "Other"
-us_citizenship = "Other"
+us_citizenship = "Non-citizen allowed to work for any employer"
 
 
 
@@ -107,8 +107,14 @@ Note: If left empty as "", the tool will not answer the question. However, note 
 '''
 
 # Your cover letter in quotes, use \n to add line breaks if using single quotes "Cover Letter".You can skip \n if using triple quotes """Cover Letter""" (This question makes sense though)
-cover_letter = """
-Cover Letter
+cover_letter = """Dear Hiring Team,
+
+I am Elias Saffarmoghadam, an Electrical and Network Engineer with an MSc in Internet & Multimedia Engineering, applying for this opening. My background combines wireless communications, signal processing, embedded systems, and applied machine learning, with hands-on work in digital communication, QoS, cognitive dynamic systems, and III-V micro-LED design.
+
+I am based in Genova, hold a valid work permit, and code daily in Python and C++ alongside lower-level firmware and network stacks. I would welcome the chance to bring this mix of RF, software, and systems thinking to your team.
+
+Best regards,
+Elias Saffarmoghadam
 """
 ##> ------ Dheeraj Deshwal : dheeraj9811 Email:dheeraj20194@iiitd.ac.in/dheerajdeshwal9811@gmail.com - Feature ------
 

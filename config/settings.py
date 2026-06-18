@@ -35,6 +35,16 @@ close_tabs = False                  # True or False, Note: True or False are cas
 Note: RECOMMENDED TO LEAVE IT AS `True`, if you set it `False`, be sure to CLOSE ALL TABS BEFORE CLOSING THE BROWSER!!!
 '''
 
+# Keep Chrome open after the bot exits so you can rerun without logging in again?
+keep_browser_open_on_exit = True    # True or False, Note: True or False are case-sensitive
+'''
+Note: When True and `run_in_background = False`, Chrome stays open after the bot finishes.
+Close the Chrome window manually when you are done.
+'''
+
+# Local Chrome debug port used to reconnect to the left-open Chrome window.
+browser_debug_port = 9222           # Integer port number. Change only if this port is already in use.
+
 # Follow easy applied companies
 follow_companies = False            # True or False, Note: True or False are case-sensitive
 

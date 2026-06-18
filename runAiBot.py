@@ -207,6 +207,22 @@ def login_LN() -> None:
 #>
 
 
+def ensure_linkedin_login() -> None:
+    '''
+    Opens LinkedIn and only asks for manual login when the current browser
+    profile does not already have an authenticated LinkedIn session.
+    '''
+    driver.get("https://www.linkedin.com/feed/")
+    buffer(2)
+    if is_logged_in_LN():
+        print_lg("Already logged in to LinkedIn. Continuing with the existing browser session.")
+        return
+
+    driver.get("https://www.linkedin.com/login")
+    if not wait_for_manual_linkedin_login():
+        manual_login_retry(is_logged_in_LN, 2)
+
+
 
 def get_applied_job_ids() -> set[str]:
     '''
@@ -351,6 +367,34 @@ def get_page_info() -> tuple[WebElement | None, int | None]:
 
 
 
+def click_job_details_button(job_details_button: WebElement, title: str, company: str, job_id: str) -> bool:
+    '''
+    Clicks a LinkedIn job card link after positioning it away from sticky headers.
+    Returns False when the card cannot be clicked so the run can skip it.
+    '''
+    for attempt in range(3):
+        try:
+            scroll_to_view(driver, job_details_button)
+            buffer(1)
+            if attempt == 0:
+                job_details_button.click()
+            elif attempt == 1:
+                actions.move_to_element(job_details_button).click().perform()
+            else:
+                driver.execute_script("arguments[0].click();", job_details_button)
+            return True
+        except ElementClickInterceptedException as e:
+            print_lg(f'Click intercepted for "{title} | {company}" job. Job ID: {job_id}. Retrying with adjusted scroll.', e)
+            driver.execute_script("window.scrollBy(0, -140);")
+            buffer(1)
+        except Exception as e:
+            print_lg(f'Failed to click "{title} | {company}" job on details button. Job ID: {job_id}!', e)
+            return False
+    print_lg(f'Failed to click "{title} | {company}" job after retries. Job ID: {job_id}. Skipping this job.')
+    return False
+
+
+
 def get_job_main_details(job: WebElement, blacklisted_companies: set, rejected_jobs: set) -> tuple[str, str, str, str, str, bool]:
     '''
     # Function to get job main details.
@@ -364,7 +408,7 @@ def get_job_main_details(job: WebElement, blacklisted_companies: set, rejected_j
     '''
     skip = False
     job_details_button = job.find_element(By.TAG_NAME, 'a')  # job.find_element(By.CLASS_NAME, "job-card-list__title")  # Problem in India
-    scroll_to_view(driver, job_details_button, True)
+    scroll_to_view(driver, job_details_button)
     job_id = job.get_dom_attribute('data-occludable-job-id')
     title = job_details_button.text
     title = title[:title.find("\n")]
@@ -389,13 +433,8 @@ def get_job_main_details(job: WebElement, blacklisted_companies: set, rejected_j
             skip = True
             print_lg(f'Already applied to "{title} | {company}" job. Job ID: {job_id}!')
     except: pass
-    try: 
-        if not skip: job_details_button.click()
-    except Exception as e:
-        print_lg(f'Failed to click "{title} | {company}" job on details button. Job ID: {job_id}!') 
-        # print_lg(e)
-        discard_job()
-        job_details_button.click() # To pass the error outside
+    if not skip and not click_job_details_button(job_details_button, title, company, job_id):
+        skip = True
     buffer(click_gap)
     return (job_id,title,company,work_location,work_style,skip)
 
@@ -1213,8 +1252,11 @@ def apply_to_jobs(search_terms: list[str], use_current_page: bool = False) -> Ru
                     print_lg(f"\n>-> Didn't find Page {current_page+1}. Probably at the end page of results!\n")
                     break
 
-        except (NoSuchWindowException, WebDriverException) as e:
+        except NoSuchWindowException as e:
             print_lg("Browser window closed or session is invalid. Ending application process.", e)
+            raise e # Re-raise to be caught by main
+        except WebDriverException as e:
+            print_lg("Selenium browser operation failed. Ending application process.", e)
             raise e # Re-raise to be caught by main
         except Exception as e:
             print_lg("Failed to find Job listings!")
@@ -1252,7 +1294,7 @@ def main() -> None:
     total_runs = 1
     try:
         global linkedIn_tab, tabs_count, useNewResume, aiClient
-        alert_title = "Error Occurred. Closing Browser!"
+        alert_title = "Error Occurred"
         validate_config()
         
         if not os.path.exists(default_resume_path):
@@ -1261,9 +1303,7 @@ def main() -> None:
         
         # Login to LinkedIn
         tabs_count = len(driver.window_handles)
-        driver.get("https://www.linkedin.com/login")
-        if not wait_for_manual_linkedin_login():
-            manual_login_retry(is_logged_in_LN, 2)
+        ensure_linkedin_login()
         
         linkedIn_tab = driver.current_window_handle
 
@@ -1306,8 +1346,11 @@ def main() -> None:
             total_runs, run_status = run(total_runs, use_current_page=True)
         
 
-    except (NoSuchWindowException, WebDriverException) as e:
+    except NoSuchWindowException as e:
         print_lg("Browser window closed or session is invalid. Exiting.", e)
+    except WebDriverException as e:
+        print_lg("Selenium browser operation failed. Exiting.", e)
+        pyautogui.alert(str(e), alert_title)
     except Exception as e:
         critical_error_log("In Applier Main", e)
         pyautogui.alert(str(e), alert_title)
@@ -1343,8 +1386,12 @@ def main() -> None:
             timeSaved += 60
             timeSavedMsg = f"In this run, you saved approx {round(timeSaved/60)} mins ({timeSaved} secs), please consider supporting the project."
         msg = f"{quotes}\n\n\n{timeSavedMsg}\nYou can also get your quote and name shown here, or prioritize your bug reports by supporting the project at:\n\nhttps://github.com/sponsors/GodsScion\n\n\nSummary:\n{summary}\n\n\nBest regards,\nSai Vignesh Golla\nhttps://www.linkedin.com/in/saivigneshgolla/\n\nTop Sponsors:\n{sponsors}"
-        pyautogui.alert(msg, "Exiting..")
-        print_lg(msg,"Closing the browser...")
+        keep_browser_open = keep_browser_open_on_exit and not run_in_background
+        exit_title = "Finished - Browser Left Open" if keep_browser_open else "Exiting.."
+        if keep_browser_open:
+            msg = f"{msg}\n\n\nChrome has been left open so you can rerun the bot with different parameters without logging in again. Close the Chrome window manually when you are done."
+        pyautogui.alert(msg, exit_title)
+        print_lg(msg, "Leaving the browser open..." if keep_browser_open else "Closing the browser...")
         if tabs_count >= 10:
             msg = "NOTE: IF YOU HAVE MORE THAN 10 TABS OPENED, PLEASE CLOSE OR BOOKMARK THEM!\n\nOr it's highly likely that application will just open browser and not do anything next time!" 
             pyautogui.alert(msg,"Info")
@@ -1362,13 +1409,14 @@ def main() -> None:
             except Exception as e:
                 print_lg("Failed to close AI client:", e)
         ##<
-        try:
-            if driver:
-                driver.quit()
-        except WebDriverException as e:
-            print_lg("Browser already closed.", e)
-        except Exception as e: 
-            critical_error_log("When quitting...", e)
+        if not keep_browser_open:
+            try:
+                if driver:
+                    driver.quit()
+            except WebDriverException as e:
+                print_lg("Browser already closed.", e)
+            except Exception as e:
+                critical_error_log("When quitting...", e)
 
 
 if __name__ == "__main__":
